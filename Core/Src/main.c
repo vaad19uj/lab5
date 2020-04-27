@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "lcd.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -47,6 +48,10 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+int ADC_values[4];
+int ADCDataReady = 0;	//flag, 0 if false, 1 if true
+TextLCDType LCD;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,6 +65,28 @@ static void MX_ADC1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+char digitToASCII(int digit){
+	return digit + 0x30;
+}
+
+void displayADCValues(){
+//	Check if callback has flagged data ready
+	if(ADCDataReady == 1){
+		int ADCVal = 0;
+		// position 0
+		TextLCD_Position(&LCD, 0, 0);
+
+		// Read values from Array and display on LCD
+		for(int i = 0; i < 4; i+=1){
+			ADCVal = ADC_values[i];
+			// put char for displaying data
+			TextLCD_Putchar(&LCD, digitToASCII(ADCVal));
+			//space
+			TextLCD_Putchar(&LCD, 0x20);
+		}
+	}
+}
 
 /* USER CODE END 0 */
 
@@ -94,6 +121,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+  TextLCD_Init(&LCD, GPIOB, LCD_RS_Pin, LCD_RW_Pin, LCD_E_Pin, GPIOC);	// LCD init
 
   /* USER CODE END 2 */
 
@@ -101,6 +129,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  displayADCValues();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -315,6 +344,13 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+// ADC callback
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
+//	1) New ADC value ready since we got callback.
+//	2) Store value in Array at index, then increase index
+//	3) If Array is full, flag to main loop that data is ready. Reset index to zero.
+}
 
 /* USER CODE END 4 */
 
