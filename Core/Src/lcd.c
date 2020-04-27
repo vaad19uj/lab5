@@ -7,7 +7,7 @@
 
 #include "lcd.h"
 
-void delay_Microsecs(uint16_t);
+void delay_Microsecs(uint16_t Delay);
 
 static void TextLCD_Strobe(TextLCDType *lcd){
 	// enable set reset with delay
