@@ -98,16 +98,60 @@ void displayADCValues(){
 		// position 0
 		TextLCD_Position(&LCD, 0, 0);
 
-		// Read values from Array and display on LCD
-		for(int i = 0; i < 4; i+=1){
-			ADCVal = ADC_values[i];
-			// put char for displaying data
-			TextLCD_Puts(&LCD, intToString(ADCVal));
-			free(string);
-			//print space
-			TextLCD_Putchar(&LCD, 0x20);
-		}
+		static int index = 0;
+		static int previousVal = 0;
+
+			switch(index){
+			case 0:
+				ADCVal = ADC_values[index];
+
+				int changeX = ADCVal - previousVal;
+				// put char for displaying data
+				TextLCD_Puts(&LCD, intToString(changeX));
+				free(string);
+				//print space
+				TextLCD_Putchar(&LCD, 0x20);
+				index +=1;
+				//break;
+			case 1:
+				ADCVal = ADC_values[index];
+
+				int changeY = ADCVal - previousVal;
+				// put char for displaying data
+				TextLCD_Puts(&LCD, intToString(changeY));
+				free(string);
+				//print space
+				TextLCD_Putchar(&LCD, 0x20);
+				index +=1;
+			//	break;
+			case 2:
+				ADCVal = ADC_values[index];
+
+				int celcius = ADCVal*3.3/4095*100;
+				// put char for displaying data
+				TextLCD_Puts(&LCD, intToString(celcius));
+				free(string);
+				//print space
+				TextLCD_Putchar(&LCD, 0x20);
+				index +=1;
+			//	break;
+			case 3:
+				ADCVal = ADC_values[index];
+				// put char for displaying data
+				TextLCD_Puts(&LCD, intToString(ADCVal));
+				free(string);
+				//print space
+				TextLCD_Putchar(&LCD, 0x20);
+
+				index = 0;
+				ADCDataReady = 0;	// reset flag
+				break;
+			}
+
+
 	}
+
+
 }
 
 /* USER CODE END 0 */
