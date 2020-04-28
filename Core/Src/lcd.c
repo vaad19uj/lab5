@@ -12,11 +12,11 @@ void delay_Microsecs(uint16_t Delay);
 static void TextLCD_Strobe(TextLCDType *lcd){
 	// enable set reset with delay
 	HAL_GPIO_WritePin(lcd->controlPort, lcd->enPin, GPIO_PIN_SET);
-//	HAL_Delay(5);
-	delay_Microsecs(50);
+	HAL_Delay(5);
+//	delay_Microsecs(50);
 	HAL_GPIO_WritePin(lcd->controlPort, lcd->enPin, GPIO_PIN_RESET);
-	delay_Microsecs(110);
-//	HAL_Delay(5);
+//	delay_Microsecs(110);
+	HAL_Delay(5);
 
 }
 
@@ -78,14 +78,16 @@ void TextLCD_Home(TextLCDType *lcd){
 	uint8_t cmd = 0x02;
 	TextLCD_Cmd(lcd, cmd);		// cursor home
 	TextLCD_Strobe(lcd);
-	delay_Microsecs(2000);
+//	delay_Microsecs(2000);
+	HAL_Delay(2);
 }
 
 void TextLCD_Clear(TextLCDType *lcd){
 	uint8_t cmd = 0x01;
 	TextLCD_Cmd(lcd, cmd);		// clear display
 	TextLCD_Strobe(lcd);
-	delay_Microsecs(2000);
+//	delay_Microsecs(2000);
+	HAL_Delay(2);
 }
 
 void TextLCD_Position(TextLCDType *lcd, int x, int y){

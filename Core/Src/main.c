@@ -24,6 +24,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "lcd.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 /* USER CODE END Includes */
 
@@ -53,6 +55,8 @@ UART_HandleTypeDef huart2;
 int ADC_values[4];
 int ADCDataReady = 0;	//flag, 0 if false, 1 if true
 TextLCDType LCD;
+int indexADC = 0;
+char* string;
 
 /* USER CODE END PV */
 
@@ -78,10 +82,14 @@ void delay_Microsecs(uint16_t Delay){
 	}
 }
 
+char* intToString(int val){
+	int length = snprintf(NULL, 0, "%d", val);
+	string = malloc(length +1);
+	snprintf(string, length +1, "%d", val);
 
-char digitToASCII(int digit){
-	return digit + 0x30;
+	return string;
 }
+
 
 void displayADCValues(){
 //	Check if callback has flagged data ready
@@ -94,8 +102,9 @@ void displayADCValues(){
 		for(int i = 0; i < 4; i+=1){
 			ADCVal = ADC_values[i];
 			// put char for displaying data
-			TextLCD_Putchar(&LCD, digitToASCII(ADCVal));
-			//space
+			TextLCD_Puts(&LCD, intToString(ADCVal));
+			free(string);
+			//print space
 			TextLCD_Putchar(&LCD, 0x20);
 		}
 	}
@@ -136,6 +145,7 @@ int main(void)
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_ADC_Start_IT(&hadc1);
   HAL_TIM_Base_Start_IT(&htim11);		// start timer 11
   TextLCD_Init(&LCD, GPIOB, LCD_RS_Pin, LCD_RW_Pin, LCD_E_Pin, GPIOC);	// LCD init
 
@@ -394,10 +404,18 @@ static void MX_GPIO_Init(void)
 
 // ADC callback
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
-//	1) New ADC value ready since we got callback.
-//	2) Store value in Array at index, then increase index
-//	3) If Array is full, flag to main loop that data is ready. Reset index to zero.
+	//	1) New ADC value ready since we got callback.
+	if(AdcHandle->Instance == ADC1){
+		//	2) Store value in Array at index, then increase index
+		ADC_values[indexADC] = HAL_ADC_GetValue(AdcHandle);
+		indexADC +=1;
 
+		// 3) If Array is full, flag to main loop that data is ready. Reset index to zero.
+		if(indexADC == 4){
+			indexADC = 0;
+			ADCDataReady = 1;
+		}
+	}
 }
 
 /* USER CODE END 4 */
